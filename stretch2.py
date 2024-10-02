@@ -31,8 +31,16 @@ class StretchReminder:
         history_label = tk.Label(self.current_dialog, text="Stretch History:")
         history_label.pack()
 
-        history_listbox = tk.Listbox(self.current_dialog, width=50, height=10)
-        history_listbox.pack(pady=5)
+        history_frame = tk.Frame(self.current_dialog)
+        history_frame.pack(pady=5, fill=tk.BOTH, expand=True)
+
+        history_scrollbar = tk.Scrollbar(history_frame)
+        history_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        history_listbox = tk.Listbox(history_frame, width=50, height=10, yscrollcommand=history_scrollbar.set)
+        history_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        history_scrollbar.config(command=history_listbox.yview)
 
         for entry in self.log:
             history_listbox.insert(tk.END, entry)
