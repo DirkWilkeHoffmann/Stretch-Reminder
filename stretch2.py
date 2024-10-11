@@ -6,12 +6,13 @@ import os
 
 DEFAULT_COUNTDOWN_TIME = 0.1 * 60  # 20 minutes
 LOG_FILE = os.path.join(os.path.dirname(__file__), "stretch_log.txt")
+TIME_FILE = os.path.join(os.path.dirname(__file__), "last_selected_time.txt")
 
 
 class StretchReminder:
     def __init__(self):
         self.log = self.load_log()
-        self.countdown = DEFAULT_COUNTDOWN_TIME
+        self.countdown = self.load_last_selected_time() * 60
         self.root = tk.Tk()
         self.root.withdraw()  # Hide the main window
         self.timer_thread = None
@@ -28,6 +29,16 @@ class StretchReminder:
         with open(LOG_FILE, "w") as file:
             for entry in self.log:
                 file.write(f"{entry}\n")
+
+    def load_last_selected_time(self):
+        if os.path.exists(TIME_FILE):
+            with open(TIME_FILE, "r") as file:
+                return int(file.read().strip())
+        return int(DEFAULT_COUNTDOWN_TIME / 60)
+
+    def save_last_selected_time(self, time_in_minutes):
+        with open(TIME_FILE, "w") as file:
+            file.write(str(time_in_minutes))
 
     def show_popup(self):
         if self.current_dialog:
@@ -79,7 +90,9 @@ class StretchReminder:
         if self.current_dialog:
             self.current_dialog.destroy()
             self.current_dialog = None
-        self.countdown = self.time_var.get() * 60  # Reset the countdown with the selected time
+        selected_time = self.time_var.get()
+        self.countdown = selected_time * 60  # Reset the countdown with the selected time
+        self.save_last_selected_time(selected_time)
 
     def timer_loop(self):
         while not self.stop_event.is_set():
